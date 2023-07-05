@@ -1,21 +1,14 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.middleware.cors import CORSMiddleware
-
+import uvicorn
+import asyncio
 from src.DB.db import get_db
 from src.routes import contacts
 
 app = FastAPI()
 app.include_router(contacts.router, tags=["contacts"])
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 @app.get("/", tags=["Root"])
 async def root():
@@ -39,3 +32,10 @@ async def healthchecker(session: AsyncSession = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error connecting to the database",
         )
+
+
+async def main():
+    uvicorn.run("main:app", host="localhost", port=8000, reload=True)
+
+if __name__ == "__main__":
+    asyncio.run(main())
